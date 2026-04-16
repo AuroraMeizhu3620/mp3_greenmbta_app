@@ -2,140 +2,117 @@ from pathlib import Path
 import os
 import requests
 from dotenv import load_dotenv
-from pprint import pprint
 
 load_dotenv()
+
 
 # linking to API keys stored in .env file
 MAPBOX_TOKEN = os.getenv("MAPBOX_API_KEY")
 MBTA_API_KEY = os.getenv("MBTA_API_KEY")
 
-# # geocode_transform: user address input -> (geocode_transform) -> latitude and longtitude
-# def geocode_transform(place):
-#     """
-#     Takes place name or address entered by user and returns it in the latitude and longitude format using the Mapbox Geocoding API.
-#     """
-#     mapbox_url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{place}.json?access_token={MAPBOX_TOKEN}&limit=1"
 
-#     try:
-#         data = requests.get(mapbox_url).json()
 
-#         # if no results found
-#         if len(data["features"]) == 0:
-#             print("Error: Could not geocode the place. Please check your input and try again.")
-#             return None
 
-#         longitude = data["features"][0]["center"][0]
-#         latitude = data["features"][0]["center"][1]
 
-#         return (latitude, longitude)
 
-#     except: # If anything else were to be the case
-#         print("Error: Could not geocode the place. Please check your input and try again.")
-#         return None
+def nearest_stop(latitude, longitude):
+    """
+    Takes latitude and longitude and returns the nearest MBTA stop using the MBTA API."""
+    url = f"https://api-v3.mbta.com/stops?api_key={MBTA_API_KEY}&filter[latitude]={latitude}&filter[longitude]={longitude}&filter[radius]=0.05&sort=distance&page[limit]=1"
+
+    try:
+        data = requests.get(url).json()
+
+        if len(data["data"]) == 0:
+            print("Please try another location for your search.")
+            return None
+
+        stop = data["data"][0]["attributes"]
+
+        description = stop["description"]
+        municipality = stop["municipality"]
+        wheelchair = stop["wheelchair_boarding"]
+
+        return description
+
+    except:
+        print("Error: Could not find the nearest MBTA stop.")
+        return None
+
+result = nearest_stop(latitude, longitude)
+print(result)
+
+
+# returns the address of the stop using the name of the train station stop
+def stop_address(description):
+    """
+    Takes the description of the nearest MBTA stop, which is a stop name, and returns the address of the stop using the Mapbox Geocoding API.
+    """
+    mapbox_url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{description}.json?access_token={MAPBOX_TOKEN}&limit=1"
+    try:
+        data = requests.get(mapbox_url).json()
+        if len(data["features"]) == 0:
+            print("Error: Could not geocode the stop address.")
+            return None
+        address = data["features"][0]["place_name"]
+        return address
+    except:
+        print("Error: Could not geocode the stop address.")
+        return None
+
+print(stop_address(result))
+
+
+def stop_render(address):
+    """
+    Takes the address of the nearest MBTA stop and returns a URL to a static map image of the stop location using the Mapbox Static Images API.
+    """
+    mapbox_url = f"https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/{address}/400x400?access_token={MAPBOX_TOKEN}"
+    return mapbox_url
+
+
+# attains AQI that describes the air quality
+def get_air_quality(latitude, longitude):
+    """
+    Takes latitude and longitude and returns air quality (US AQI)
+    from Open-Meteo Air Quality API.
+    """
+
+    air_url = f"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={latitude}&longitude={longitude}&current=us_aqi"
+
+    try:
+        data = requests.get(air_url).json()
+
+        aqi = data["current"]["us_aqi"]
+
+        return aqi
+
+    except:
+        print("Error: Could not get air quality data.")
+        return None
+
+# Helper function to convert AQI value to a label
+def air_quality_label(aqi):
+    if aqi is None:
+        return "Unavailable"
+    elif aqi <= 50:
+        return "Good"
+    elif aqi <= 100:
+        return "Moderate"
+    elif aqi <= 150:
+        return "Unhealthy for Sensitive Groups"
+    elif aqi <= 200:
+        return "Unhealthy"
+    elif aqi <= 300:
+        return "Very Unhealthy"
+    else:
+        return "Hazardous"
     
-# latitude, longitude = geocode_transform("Babson College")
-# print(latitude, longitude)
-latitude = 42.297885
-longitude =  -71.2649472
-mbta_url = f"https://api-v3.mbta.com/stops?api_key={MBTA_API_KEY}&filter[latitude]={latitude}&filter[longitude]={longitude}&filter[radius]=0.05&sort=distance&page[limit]=1"
-data = requests.get(mbta_url).json()
-print("Top-level keys:")
-print(data.keys())
+aqi = get_air_quality(latitude, longitude)
+label = air_quality_label(aqi)
 
-
-print("\nFirst stop:")
-pprint(data["data"][0])
-
-print("\nKeys inside first stop:")
-print(data["data"][0].keys())
-
-print("\nAttributes:")
-pprint(data["data"][0]["attributes"])
-
-print("\nRelationship keys:")
-print(data["data"][0]["relationships"].keys())
-
-
-# # nearest_stop: latitude, longitude -> (nearest_stop) -> nearest MBTA stop name
-# def nearest_stop(latitude, longitude):
-#     url = f"https://api-v3.mbta.com/stops?api_key={MBTA_API_KEY}&filter[latitude]={latitude}&filter[longitude]={longitude}&sort=distance&page[limit]=1"
-
-#     try:
-#         data = requests.get(url).json()
-
-#         if len(data["data"]) == 0:
-#             print("Please try another location for your search.")
-#             return None
-
-#         stop_name = data["data"][0]["attributes"]["name"]
-#         return stop_name
-
-#     except:
-#         print("Error: Could not find the nearest MBTA stop.")
-#         return None
-
-# location = geocode_transform("Babson College")
-# print(location)
-
-# if location is None:
-#     print("Failed to get coordinates.")
-# else:
-#     latitude = location[0]
-#     longitude = location[1]
-
-#     print(nearest_stop(latitude, longitude))
-
-# # def find_nearest_stop(latitude, longitude):
-# #     """
-# #     Takes latitude and longitude and returns the nearest MBTA stop name.
-# #     """
-# #     url = "https://api-v3.mbta.com/stops"
-
-# #     params = {
-# #         "api_key": MBTA_API_KEY,
-# #         "filter[latitude]": latitude,
-# #         "filter[longitude]": longitude,
-# #         "sort": "distance",
-# #         "page[limit]": 1
-# #     }
-
-# #     response = requests.get(url, params=params)
-# #     response.raise_for_status()
-# #     data = response.json()
-
-# #     stops = data.get("data", [])
-# #     if not stops:
-# #         return None
-
-# #     stop = stops[0]
-# #     stop_name = stop["attributes"]["name"]
-
-# #     return stop_name
-
-
-# # def get_air_quality(latitude, longitude):
-# #     """
-# #     Takes latitude and longitude and returns air quality information
-# #     from Open-Meteo Air Quality API.
-# #     """
-# #     url = "https://air-quality-api.open-meteo.com/v1/air-quality"
-
-# #     params = {
-# #         "latitude": latitude,
-# #         "longitude": longitude,
-# #         "current": "us_aqi"
-# #     }
-
-# #     response = requests.get(url, params=params)
-# #     response.raise_for_status()
-# #     data = response.json()
-
-# #     current_data = data.get("current", {})
-# #     us_aqi = current_data.get("us_aqi")
-
-# #     return us_aqi
-
+print("AQI:", aqi)
+print("Air Quality:", label)
 
 # # def build_trip_info(place_name):
 # #     """
