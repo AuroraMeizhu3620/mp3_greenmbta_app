@@ -1,21 +1,360 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ result.location_input }}</title>
+
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.21.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.21.0/mapbox-gl.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, Arial, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+        }
+
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 20px 48px;
+        }
+
+        .hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 24px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .hero-left h1 {
+            margin: 0 0 8px 0;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .hero-left p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 1rem;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: #2563eb;
+            font-weight: 600;
+            background: white;
+            border: 1px solid #dbe3f0;
+            padding: 10px 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+            transition: 0.2s ease;
+        }
+
+        .back-link:hover {
+            background: #eff6ff;
+        }
+
+        .map-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 24px;
+        }
+
+        .route-controls {
+            display: flex;
+            gap: 12px;
+            padding: 18px 18px 0 18px;
+            flex-wrap: wrap;
+        }
+
+        .route-btn {
+            border: 1px solid #dbe3f0;
+            background: #ffffff;
+            color: #1f2937;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .route-btn:hover {
+            background: #eff6ff;
+        }
+
+        .route-btn.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        #map {
+            width: 100%;
+            height: 500px;
+            margin-top: 16px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+            border: 1px solid #e5e7eb;
+        }
+
+        .card h2 {
+            margin: 0 0 18px 0;
+            font-size: 1.1rem;
+            color: #111827;
+        }
+
+        .label {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 14px;
+            line-height: 1.4;
+        }
+
+        .aqi-badge {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+            background: #e5f7eb;
+            color: #166534;
+        }
+
+        .aqi-number {
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0 0 8px 0;
+            color: #111827;
+        }
+
+        .aqi-message {
+            margin: 0;
+            color: #374151;
+            line-height: 1.6;
+        }
+
+        .route-summary {
+            padding: 0 18px 18px 18px;
+            color: #4b5563;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero-left h1 {
+                font-size: 1.8rem;
+            }
+
+            #map {
+                height: 380px;
+            }
+
+            .page {
+                padding: 20px 14px 36px;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="page">
+        <div class="hero">
+            <div class="hero-left">
+                <h1>{{ result.location_input }}</h1>
+                <p>Your nearest MBTA stop and current air quality</p>
+            </div>
+            <a class="back-link" href="/">← Search another location</a>
+        </div>
 
-    <h1>Results</h1>
+        <div class="map-card">
+            <div class="route-controls">
+                <button class="route-btn active" data-profile="walking">Walking</button>
+                <button class="route-btn" data-profile="cycling">Biking</button>
+                <button class="route-btn" data-profile="driving">Driving</button>
+            </div>
+            <div id="route-summary" class="route-summary">Loading walking route...</div>
+            <div id="map"></div>
+        </div>
 
-    <h2>Location: {{ result.location_input }}</h2>
+        <div class="cards">
+            <div class="card">
+                <h2>Nearest MBTA Stop</h2>
 
-    <h3>Nearest MBTA Stop</h3>
-    <p>Name: {{ result.stop.name }}</p>
-    <p>Address: {{ result.stop.address }}</p>
+                <div class="label">Station Name</div>
+                <div class="value">{{ result.stop.name }}</div>
 
-    <h3>Air Quality</h3>
-    <p>AQI: {{ result.air_quality.aqi }}</p>
-    <p>Status: {{ result.air_quality.level }}</p>
-    <p>{{ result.air_quality.message }}</p>
+                <div class="label">Address</div>
+                <div class="value">{{ result.stop.address }}</div>
+            </div>
 
+            <div class="card">
+                <h2>Air Quality</h2>
+
+                <div class="aqi-number">{{ result.air_quality.aqi }}</div>
+                <div class="aqi-badge">{{ result.air_quality.level }}</div>
+                <p class="aqi-message">{{ result.air_quality.message }}</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        mapboxgl.accessToken = {{ mapbox_token | tojson }};
+
+        const userLat = {{ result.coordinates.latitude | tojson }};
+        const userLon = {{ result.coordinates.longitude | tojson }};
+        const stopLat = {{ result.stop.latitude | tojson }};
+        const stopLon = {{ result.stop.longitude | tojson }};
+        const stopName = {{ result.stop.name | tojson }};
+        const stopAddress = {{ result.stop.address | tojson }};
+        const locationInput = {{ result.location_input | tojson }};
+
+        const map = new mapboxgl.Map({
+            container: "map",
+            style: "mapbox://styles/mapbox/standard",
+            center: [userLon, userLat],
+            zoom: 13
+        });
+
+        const bounds = new mapboxgl.LngLatBounds();
+        bounds.extend([userLon, userLat]);
+        bounds.extend([stopLon, stopLat]);
+
+        new mapboxgl.Marker({ color: "#2563eb" })
+            .setLngLat([userLon, userLat])
+            .setPopup(
+                new mapboxgl.Popup().setHTML(
+                    `<strong>Your Location</strong><br>${locationInput}`
+                )
+            )
+            .addTo(map);
+
+        new mapboxgl.Marker({ color: "#10b981" })
+            .setLngLat([stopLon, stopLat])
+            .setPopup(
+                new mapboxgl.Popup().setHTML(
+                    `<strong>${stopName}</strong><br>${stopAddress}`
+                )
+            )
+            .addTo(map);
+
+        function formatDuration(seconds) {
+            const minutes = Math.round(seconds / 60);
+            if (minutes < 60) return `${minutes} min`;
+            const hours = Math.floor(minutes / 60);
+            const remaining = minutes % 60;
+            return remaining ? `${hours} hr ${remaining} min` : `${hours} hr`;
+        }
+
+        function formatDistance(meters) {
+            const miles = meters / 1609.34;
+            return `${miles.toFixed(1)} mi`;
+        }
+
+        async function loadRoute(profile) {
+            const summary = document.getElementById("route-summary");
+            summary.textContent = `Loading ${profile} route...`;
+
+            const profileMap = {
+                walking: "mapbox/walking",
+                cycling: "mapbox/cycling",
+                driving: "mapbox/driving"
+            };
+
+            const routingProfile = profileMap[profile];
+
+            const url = `https://api.mapbox.com/directions/v5/${routingProfile}/${userLon},${userLat};${stopLon},${stopLat}?geometries=geojson&overview=full&access_token=${mapboxgl.accessToken}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data.routes || data.routes.length === 0) {
+                    summary.textContent = `No ${profile} route found.`;
+                    return;
+                }
+
+                const route = data.routes[0];
+                const routeGeoJSON = {
+                    type: "Feature",
+                    geometry: route.geometry
+                };
+
+                if (map.getSource("route")) {
+                    map.getSource("route").setData(routeGeoJSON);
+                } else {
+                    map.addSource("route", {
+                        type: "geojson",
+                        data: routeGeoJSON
+                    });
+
+                    map.addLayer({
+                        id: "route-layer",
+                        type: "line",
+                        source: "route",
+                        layout: {
+                            "line-join": "round",
+                            "line-cap": "round"
+                        },
+                        paint: {
+                            "line-color": "#2563eb",
+                            "line-width": 5,
+                            "line-opacity": 0.85
+                        }
+                    });
+                }
+
+                summary.textContent = `${profile.charAt(0).toUpperCase() + profile.slice(1)} route: ${formatDistance(route.distance)} · ${formatDuration(route.duration)}`;
+
+                map.fitBounds(bounds, { padding: 80 });
+            } catch (error) {
+                console.error("Route load error:", error);
+                summary.textContent = `Could not load ${profile} route.`;
+            }
+        }
+
+        document.querySelectorAll(".route-btn").forEach((button) => {
+            button.addEventListener("click", () => {
+                document.querySelectorAll(".route-btn").forEach((btn) => btn.classList.remove("active"));
+                button.classList.add("active");
+                loadRoute(button.dataset.profile);
+            });
+        });
+
+        map.on("load", () => {
+            map.fitBounds(bounds, { padding: 80 });
+            loadRoute("walking");
+        });
+    </script>
 </body>
 </html>

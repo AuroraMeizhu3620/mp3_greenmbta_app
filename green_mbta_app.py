@@ -1,12 +1,12 @@
 from flask import Flask, render_template, request
-
-from functions.geocode_transform import geocode_transform
-from functions.nearest_stop import nearest_stop
-from functions.get_air_quality import get_air_quality
-from functions.interpret_aqi import interpret_aqi
 from functions.results import results
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
+MAPBOX_TOKEN = os.getenv("MAPBOX_API_KEY")
 
 @app.route("/")
 def home_form():
@@ -14,20 +14,13 @@ def home_form():
 
 @app.route("/submit", methods=["POST"])
 def submit():
-    # 1. Get user input
     location = request.form["location"]
-
-    print("User entered:", location)
-
-    # 2. Call your pipeline function
     result = results(location)
 
-    # 3. Handle errors
     if "error" in result:
         return result["error"]
 
-    # 4. Send result to HTML template
-    return render_template("result.html", result=result)  
-    
+    return render_template("result.html", result=result, mapbox_token=MAPBOX_TOKEN)
+
 if __name__ == "__main__":
     app.run(debug=True)
