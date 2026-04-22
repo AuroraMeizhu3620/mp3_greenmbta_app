@@ -1,0 +1,21 @@
+<html>
+<head>
+    <title>{{ result.location_input }}</title>
+</head>
+<body>
+
+    <h1>Results</h1>
+
+    <h2>Location: {{ result.location_input }}</h2>
+
+    <h3>Nearest MBTA Stop</h3>
+    <p>Name: {{ result.stop.name }}</p>
+    <p>Address: {{ result.stop.address }}</p>
+
+    <h3>Air Quality</h3>
+    <p>AQI: {{ result.air_quality.aqi }}</p>
+    <p>Status: {{ result.air_quality.level }}</p>
+    <p>{{ result.air_quality.message }}</p>
+
+</body>
+</html>

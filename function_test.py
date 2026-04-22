@@ -15,35 +15,22 @@ from functions.geocode_transform import geocode_transform
 latitude, longitude = geocode_transform("Babson College")
 
 
-# start latitude, longitude -> (nearest_stop) -> nearest MBTA stop, latitude, longitude
+# start latitude, longitude -> (nearest_stop) -> latitude, longitude
 from functions.nearest_stop import nearest_stop
-stop_name, stop_latitude, stop_longitude = nearest_stop(latitude, longitude)
+stop_latitude, stop_longitude = nearest_stop(latitude, longitude)
 
+# start latitude, longitude -> (stop_name) -> nearest MBTA stop name
+from functions.stop_name import stop_name
+stop_name = stop_name(stop_latitude, stop_longitude)
+
+# stop latitude, longitude -> (station_address) -> station address
+from functions.station_address import station_address
+station_address = station_address(stop_latitude, stop_longitude)
 
 # latitude, longitutde -> (get_air_quality) -> air quality information at where you are going to the train station from
 from functions.get_air_quality import get_air_quality
 aqi = get_air_quality(latitude, longitude)
 
-
 # AQI value -> (interpret_aqi) -> AQI level and message
 from functions.interpret_aqi import interpret_aqi
 print(interpret_aqi(aqi))
-
-# # def main():
-# #     place_name = input("Enter a place name or address: ")
-
-# #     result = build_trip_info(place_name)
-
-# #     if result is None:
-# #         print("Could not find that location.")
-# #     else:
-# #         print("\nResult:")
-# #         print(f"Place: {result['searched_place']}")
-# #         print(f"Latitude: {result['latitude']}")
-# #         print(f"Longitude: {result['longitude']}")
-# #         print(f"Nearest MBTA stop: {result['nearest_stop']}")
-# #         print(f"US AQI: {result['air_quality']}")
-
-
-# # if __name__ == "__main__":
-# #     main()
