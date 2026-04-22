@@ -11,7 +11,7 @@ MBTA_API_KEY = os.getenv("MBTA_API_KEY")
 
 # start (latitude, longitude) -> (nearest MBTA stop, latitude, longitude)
 def stop_name(latitude, longitude):
-    url = f"https://api-v3.mbta.com/stops?api_key={MBTA_API_KEY}&filter[latitude]={latitude}&filter[longitude]={longitude}&filter[radius]=0.05&sort=distance&page[limit]=1"
+    url = f"https://api-v3.mbta.com/stops?api_key={MBTA_API_KEY}&filter[latitude]={latitude}&filter[longitude]={longitude}&filter[radius]=1&sort=distance&page[limit]=1"
 
     try:
         data = requests.get(url).json()

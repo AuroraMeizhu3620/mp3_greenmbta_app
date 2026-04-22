@@ -18,9 +18,19 @@ def geocode_transform(place):
         return None
 
     url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{place}.json"
+
     params = {
         "access_token": MAPBOX_TOKEN,
-        "limit": 1
+        "limit": 1,
+
+        # Restrict to Massachusetts region
+        "bbox": "-73.5,41.2,-69.9,42.9",
+
+        # Bias toward Boston area
+        "proximity": "-71.0589,42.3601",
+
+        # Optional: restrict to places/addresses only
+        "types": "place,locality,neighborhood,address,poi"
     }
 
     try:
@@ -42,3 +52,6 @@ def geocode_transform(place):
     except Exception as e:
         print("Error during geocoding:", e)
         return None
+    
+
+print(geocode_transform("Wellesley College"))
