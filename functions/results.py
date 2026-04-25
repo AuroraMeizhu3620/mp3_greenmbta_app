@@ -33,23 +33,24 @@ def results(location):
     aqi_result = interpret_aqi(aqi)
 
     # Step 5: Build result
-    return {
-        "location_input": location,
+    result = {
+        "location_input": "...",
         "coordinates": {
-            "latitude": latitude,
-            "longitude": longitude
+            "latitude": ...,
+            "longitude": ...
         },
         "stop": {
-            "name": stop_name_value,
-            "address": stop_address_value,
-            "latitude": stop_latitude,
-            "longitude": stop_longitude
+            "name": "...",
+            "address": "...",
+            "latitude": ...,
+            "longitude": ...
         },
         "air_quality": {
-            "aqi": aqi,
-            "level": aqi_result["level"],
-            "message": aqi_result["message"]
+            "aqi": ...,
+            "level": "...",
+            "message": "..."
         }
     }
+
 
 print(results("Babson College"))
