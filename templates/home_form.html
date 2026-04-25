@@ -1,144 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Green MBTA App</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Green MBTA App</title>
 
-    <style>
-        body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-            /* Background = deep green glow */
-            background: radial-gradient(circle at top left, #1f4d2b, #0b1f13 70%);
-        }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, Arial, sans-serif;
+      background: #f5f7fb;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
 
-        .glass-container {
-            width: 380px;
-            padding: 40px;
+    .search-card {
+      width: 100%;
+      max-width: 460px;
+      background: white;
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      border: 1px solid #e5e7eb;
+    }
 
-            /* Liquid glass base */
-            background: rgba(120, 255, 160, 0.08);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #111827;
+    }
 
-            border-radius: 28px;
+    .subtitle {
+      margin: 0 0 28px 0;
+      color: #6b7280;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
 
-            /* Soft glass edge */
-            border: 1px solid rgba(180, 255, 200, 0.25);
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #374151;
+    }
 
-            /* Glow + depth */
-            box-shadow:
-                0 0 30px rgba(100, 255, 150, 0.25),
-                inset 0 0 20px rgba(255, 255, 255, 0.08),
-                inset 0 0 2px rgba(255,255,255,0.6);
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid #dbe3f0;
+      font-size: 1rem;
+      color: #111827;
+      outline: none;
+      transition: 0.2s ease;
+      background: #ffffff;
+    }
 
-            text-align: center;
-            color: white;
-        }
+    input::placeholder {
+      color: #9ca3af;
+    }
 
-        h1 {
-            font-size: 22px;
-            margin-bottom: 25px;
+    input:focus {
+      border-color: #10b981;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+    }
 
-            /* subtle glow text */
-            text-shadow: 0 0 10px rgba(150, 255, 180, 0.6);
-        }
+    button {
+      margin-top: 18px;
+      width: 100%;
+      padding: 14px 16px;
+      border: none;
+      border-radius: 12px;
+      background: #10b981;
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);
+    }
 
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 14px;
-            opacity: 0.8;
-        }
+    button:hover {
+      background: #059669;
+      transform: translateY(-1px);
+    }
 
-        input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 14px;
-            border: none;
-            outline: none;
+    button:active {
+      transform: scale(0.98);
+    }
 
-            /* frosted input */
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
+    .hint {
+      margin-top: 16px;
+      font-size: 0.9rem;
+      color: #6b7280;
+      line-height: 1.5;
+    }
 
-            color: white;
-            font-size: 14px;
+    @media (max-width: 600px) {
+      .search-card {
+        padding: 26px;
+      }
 
-            box-shadow:
-                inset 0 0 5px rgba(255,255,255,0.1),
-                0 0 10px rgba(100,255,150,0.2);
-        }
-
-        input::placeholder {
-            color: rgba(255,255,255,0.5);
-        }
-
-        button {
-            margin-top: 20px;
-            width: 100%;
-            padding: 12px;
-
-            border-radius: 16px;
-            border: none;
-
-            /* green gradient from your logo */
-            background: linear-gradient(135deg, #7CFF9E, #1E7A3B);
-
-            color: #0b1f13;
-            font-weight: 600;
-            cursor: pointer;
-
-            /* glow effect */
-            box-shadow:
-                0 0 20px rgba(100,255,150,0.6),
-                inset 0 0 10px rgba(255,255,255,0.4);
-
-            transition: all 0.25s ease;
-        }
-
-        button:hover {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow:
-                0 0 30px rgba(120,255,170,0.9),
-                inset 0 0 12px rgba(255,255,255,0.6);
-        }
-
-        button:active {
-            transform: scale(0.98);
-        }
-    </style>
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <div class="glass-container">
-        <h1>Green MBTA</h1>
+  <div class="search-card">
+    <h1>Green MBTA</h1>
+    <p class="subtitle">
+      Find your nearest MBTA stop and check the air quality around your destination.
+    </p>
 
-        <form action="/submit" method="post">
-            <label for="location">Enter your location</label>
-            <input type="text" id="location" name="location" placeholder="e.g. Boston Common" required>
+    <form action="/submit" method="post">
+      <label for="location">Enter your location</label>
+      <input
+        type="text"
+        id="location"
+        name="location"
+        placeholder="e.g. Boston Common"
+        required
+      />
 
-            <button type="submit">Find Nearest Stop</button>
-        </form>
-    </div>
+      <button type="submit">Find Nearest Stop</button>
+    </form>
+
+    <p class="hint">
+      Try a place name, address, or landmark in the Boston area.
+    </p>
+  </div>
 </body>
 </html>
-
-<!-- <html>
-    <head>
-        <title>Green MBTA App</title>
-    </head>
-    <body>
-        <h1>Welcome to the Green MBTA App!</h1>
-        <form action="/submit" method="post">
-            <label for="location">Enter your location:</label>
-            <input type="text" id="location" name="location" required>
-            <button type="submit">Submit</button>
-        </form>
-    </body>
-</html> -->
